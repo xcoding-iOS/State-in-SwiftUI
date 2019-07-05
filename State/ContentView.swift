@@ -12,6 +12,8 @@ struct ContentView : View {
     
     @State var priceText: String = ""
     @State var vatValue: Int = 22
+    @State var newTaxValue: Int = 0
+    @State var addNewTax: Bool = false
     
     var priceNumber: Double? {
         Double(priceText)
@@ -22,7 +24,13 @@ struct ContentView : View {
             return nil
         }
         
-        let result = price + (price * Double(vatValue)/100)
+        var result = price
+            + (price * Double(vatValue)/100)
+        
+        if (addNewTax) {
+            result += (price * Double(newTaxValue)/100)
+        }
+        
         return result
     }
     
@@ -35,20 +43,35 @@ struct ContentView : View {
             Text("VAT Calculator")
                 .font(.title)
             
-            TextField($priceText, placeholder: Text("Inserisci il prezzo"))
+            TextField("Price", text: $priceText)
                 .textFieldStyle(.roundedBorder)
                 .border(priceNumber == nil ? Color.red : Color.green)
             
-            Stepper(value: $vatValue, in: 0...100) {
-                Text("VAT Value: \(vatValue) %")
-            }
-            
-            if resultPrice != nil {
-                Text("Result: ")
+            if priceNumber != nil {
+                
+                Stepper(value: $vatValue, in: 0...100) {
+                    Text("VAT Value: \(vatValue) %")
+                }
+                
+                Toggle(isOn: $addNewTax) {
+                    Text("Add new Tax?")
+                }
+                .padding(.top, 20)
+                
+                if addNewTax {
+                    Stepper(value: $newTaxValue, in: 0...100) {
+                        Text("Tax Value: \(newTaxValue) %")
+                    }
+                    .padding(.bottom, 20)
+                }
+
+                (Text("Result: ")
                 +
                 Text(resultText)
                     .font(.system(size: 24))
-                    .fontWeight(.bold)
+                    .fontWeight(.bold))
+                
+                
             }
             
             Spacer()
@@ -61,7 +84,7 @@ struct ContentView : View {
 #if DEBUG
 struct ContentView_Previews : PreviewProvider {
     static var previews: some View {
-        ContentView(priceText: "123")
+        ContentView(priceText: "10", newTaxValue: 10)
     }
 }
 #endif
